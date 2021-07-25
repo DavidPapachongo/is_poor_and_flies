@@ -9,11 +9,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
-path_mp3 = "/home/david/IsPoorAndFlies/mp3/"
+path_mp3 = os.environ["PATH_MP3"]
 
 origins = [
-    "http://127.0.0.1:8000/songs/",
-    "http://localhost:3000",
+    os.environ["SONGS"],
+    os.environ["LOCALHOST"]
 ]
 
 @app.post("/uploadfile/", status_code=status.HTTP_201_CREATED)
@@ -45,14 +45,14 @@ def create_upload_file(file: UploadFile = File(...)):
 
 
 @app.get("/songs/", status_code=200)
-def read_songs():
+def get_songs():
     with SessionLocal() as db:
         music = db.query(Music).all()
     return music
 
 
-@app.get("/song/{song_id}", status_code=200)
-def read_song(song_id: int):
+@app.get("/songs/{song_id}", status_code=200)
+def get_song(song_id: int):
     with SessionLocal() as db:
         song = db.query(Music).filter(Music.id == song_id).one()
         if song is None:
@@ -60,8 +60,8 @@ def read_song(song_id: int):
         return song
 
 
-@app.get("/song/{song_id}/file", status_code=200)
-def read_song(song_id: int):
+@app.get("/songs/{song_id}/file", status_code=200)
+def get_song_file(song_id: int):
     with SessionLocal() as db:
         song = db.query(Music).filter(Music.id == song_id).one()
         if song is None:
@@ -71,7 +71,7 @@ def read_song(song_id: int):
         filename=song.song)
 
 
-@app.post("/song/{song_id}/like", status_code=200)
+@app.post("/songs/{song_id}/like", status_code=200)
 def like_a_song(song_id: int):
     with SessionLocal() as db:
         song = db.query(Music).filter(Music.id == song_id).one()
@@ -84,11 +84,6 @@ def like_a_song(song_id: int):
             db.refresh(song)
             return song
        
- 
-        
-
-    
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -109,11 +104,6 @@ class StorgePrevioler:
         return files_path
 
        
-
-if __name__ == "__main__":
-    
-    algo = StorgePrevioler("/home/david/Música")  
-    print(algo.get_files())
   
 
 
