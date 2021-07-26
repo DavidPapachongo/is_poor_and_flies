@@ -31,7 +31,7 @@ def create_upload_file(file: UploadFile = File(...)):
 
     with SessionLocal() as db: 
         music = Music(
-            song = file.filename,
+            filename = file.filename,
             title = audio.tag.title,
             artist = audio.tag.artist,
             album = audio.tag.album,
@@ -40,8 +40,26 @@ def create_upload_file(file: UploadFile = File(...)):
         db.add(music)
         db.commit()
         db.refresh(music)
+    
+    def get_mp3_metadata(filepath): 
+        value = eyed3.load(filepath)
 
-    return music
+        dict = {"song": filepath,
+                "title": value.tag.title,
+                "artist": value.tag.artist,
+                "album": value.tag.album,
+            }
+        try:
+            
+            dict["year"] = audio.tag.getBestDate()._year
+            return dict
+
+        except AttributeError:
+
+            dict["year"] = None
+            return dict
+
+    return get_mp3_metadata(file.filename)
 
 
 @app.get("/songs/", status_code=200)
