@@ -21,37 +21,18 @@ def create_upload_file(file: UploadFile = File(...)):
     os.chdir(path_mp3)
     buffer = open(file.filename, "wb") 
     shutil.copyfileobj(file.file, buffer)
-    audio=eyed3.load((file.filename))
-    def value():
-        try:
-            year = audio.tag.getBestDate()._year
-            return year
-        except AttributeError:
-            return None
 
-    with SessionLocal() as db: 
-        music = Music(
-            filename = file.filename,
-            title = audio.tag.title,
-            artist = audio.tag.artist,
-            album = audio.tag.album,
-            year = value()
-            )
-        db.add(music)
-        db.commit()
-        db.refresh(music)
-    
-    def get_mp3_metadata(filepath): 
-        value = eyed3.load(filepath)
+    def get_mp3_metadata(): 
+        value = eyed3.load(file.filename)
 
-        dict = {"song": filepath,
+        dict = {"song": file.filename,
                 "title": value.tag.title,
                 "artist": value.tag.artist,
                 "album": value.tag.album,
             }
         try:
             
-            dict["year"] = audio.tag.getBestDate()._year
+            dict["year"] = value.tag.getBestDate()._year
             return dict
 
         except AttributeError:
@@ -59,7 +40,21 @@ def create_upload_file(file: UploadFile = File(...)):
             dict["year"] = None
             return dict
 
-    return get_mp3_metadata(file.filename)
+    value = get_mp3_metadata()
+
+    with SessionLocal() as db:
+        music = Music(
+            filename = value["song"],
+            title = value["title"],
+            artist = value["artist"],
+            album = value["album"],
+            year = value["year"]
+            )
+        db.add(music)
+        db.commit()
+        db.refresh(music)
+
+    return get_mp3_metadata()
 
 
 @app.get("/songs/", status_code=200)
