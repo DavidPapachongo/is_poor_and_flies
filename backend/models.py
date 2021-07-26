@@ -1,6 +1,6 @@
 from typing import Collection
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.sql.sqltypes import Boolean 
+from sqlalchemy.sql.sqltypes import Boolean
 
 from database import Base
 
