@@ -12,11 +12,6 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 path_mp3 = os.environ["PATH_MP3"]
 
-origins = [
-    os.environ["SONGS"],
-    os.environ["LOCALHOST"]
-]
-
 
 def get_mp3_metadata(filepath):
     value = eyed3.load(filepath)
@@ -100,6 +95,7 @@ def like_a_song(song_id: int):
             db.refresh(song)
             return song
 
+origins = os.environ["ALLOW_ORIGINS"].split(",")
 
 app.add_middleware(
     CORSMiddleware,
