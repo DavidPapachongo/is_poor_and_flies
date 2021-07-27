@@ -29,8 +29,8 @@ export default class SongList extends React.Component {
     this.setState({ Num: Num });
   }
 
-  updateSong(id, song) {
-    const newSongs = this.state.music.map(s => s.id === id ? song : s);
+  updateSong(id, filename) {
+    const newSongs = this.state.music.map(s => s.id === id ? filename : s);
     this.setState({ music: newSongs })
   }
 
@@ -38,9 +38,9 @@ export default class SongList extends React.Component {
     const songs = this.state.music.map((item, i) => (
       <div key={item.id}>
         <li value={item.id} onClick={() => this.musClick(item.id, item.liked)}>
-          {item.song}
+          {item.filename}
         </li>
-        <LikeButton updateSong={(id, song) => this.updateSong(id, song)} Num={item.id} Like={item.liked} /> 
+        <LikeButton updateSong={(id, filename) => this.updateSong(id, filename)} Num={item.id} Like={item.liked} /> 
       </div>
     ));
 
@@ -62,8 +62,8 @@ class LikeButton extends React.Component {
   
   handleClick() {
     const num = this.props.Num
-    $.post(`http://127.0.0.1:8000/song/${num}/like`).then(song =>  {
-        this.props.updateSong(song.id, song)
+    $.post(`http://127.0.0.1:8000/songs/${num}/like`).then(filename =>  {
+        this.props.updateSong(filename.id, filename)
       }
     );
 
@@ -88,7 +88,7 @@ class AudioPlayer extends React.Component {
   }
   render() {
     const num= this.props.Num
-    const url = "http://127.0.0.1:8000/song/"+num+"/file"   
+    const url = `http://127.0.0.1:8000/songs/${num}/file`   
     
     return (
       <div>

@@ -81,9 +81,9 @@ def get_song_file(song_id: int):
         song = db.query(Music).filter(Music.id == song_id).one()
         if song is None:
             raise HTTPException(status_code=404, detail="music not found")
-        return FileResponse(path=path_mp3 + song.song,
+        return FileResponse(path=path_mp3 + song.filename,
                             media_type='application/octet-stream',
-                            filename=song.song)
+                            filename=song.filename)
 
 
 @app.post("/songs/{song_id}/like", status_code=200)
