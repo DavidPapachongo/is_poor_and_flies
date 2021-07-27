@@ -18,31 +18,32 @@ origins = [
 ]
 
 
+def get_mp3_metadata(filepath):
+    value = eyed3.load(filepath)
+
+    dict = {"song": filepath,
+            "title": value.tag.title,
+            "artist": value.tag.artist,
+            "album": value.tag.album,
+            }
+    try:
+
+        dict["year"] = value.tag.getBestDate()._year
+        return dict
+
+    except AttributeError:
+
+        dict["year"] = None
+        return dict
+
+
 @app.post("/uploadfile/", status_code=status.HTTP_201_CREATED)
 def create_upload_file(file: UploadFile = File(...)):
     os.chdir(path_mp3)
     buffer = open(file.filename, "wb")
     shutil.copyfileobj(file.file, buffer)
 
-    def get_mp3_metadata():
-        value = eyed3.load(file.filename)
-
-        dict = {"song": file.filename,
-                "title": value.tag.title,
-                "artist": value.tag.artist,
-                "album": value.tag.album,
-                }
-        try:
-
-            dict["year"] = value.tag.getBestDate()._year
-            return dict
-
-        except AttributeError:
-
-            dict["year"] = None
-            return dict
-
-    value = get_mp3_metadata()
+    value = get_mp3_metadata(file.filename)
 
     with SessionLocal() as db:
         music = Music(
@@ -56,7 +57,7 @@ def create_upload_file(file: UploadFile = File(...)):
         db.commit()
         db.refresh(music)
 
-    return get_mp3_metadata()
+    return value
 
 
 @app.get("/songs/", status_code=200)
