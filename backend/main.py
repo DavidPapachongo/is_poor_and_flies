@@ -90,15 +90,16 @@ def get_song_file(song_id: int):
 @app.post("/songs/{song_id}/like", status_code=200)
 def like_a_song(song_id: int):
     with SessionLocal() as db:
-        song = db.query(Music).filter(Music.id == song_id).one()
-        if song is None:
-            raise HTTPException(status_code=404, detail="music not found")
-        else:
+        try:
+            song = db.query(Music).filter(Music.id == song_id).one()
             song.liked = not song.liked
             db.add(song)
             db.commit()
             db.refresh(song)
             return song
+        except NoResultFound:
+            raise HTTPException(status_code=404, detail="music not found")
+            
 
 
 origins = os.environ["ALLOW_ORIGINS"].split(",")
