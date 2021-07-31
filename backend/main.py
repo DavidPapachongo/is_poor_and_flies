@@ -79,12 +79,13 @@ def get_song(song_id: int):
 @app.get("/songs/{song_id}/file", status_code=200)
 def get_song_file(song_id: int):
     with SessionLocal() as db:
-        song = db.query(Music).filter(Music.id == song_id).one()
-        if song is None:
+        try:
+            song = db.query(Music).filter(Music.id == song_id).one()
+            return FileResponse(path=path_mp3 + song.filename,
+                                media_type='application/octet-stream',
+                                filename=song.filename)
+        except NoResultFound:
             raise HTTPException(status_code=404, detail="music not found")
-        return FileResponse(path=path_mp3 + song.filename,
-                            media_type='application/octet-stream',
-                            filename=song.filename)
 
 
 @app.post("/songs/{song_id}/like", status_code=200)
@@ -99,7 +100,6 @@ def like_a_song(song_id: int):
             return song
         except NoResultFound:
             raise HTTPException(status_code=404, detail="music not found")
-            
 
 
 origins = os.environ["ALLOW_ORIGINS"].split(",")
